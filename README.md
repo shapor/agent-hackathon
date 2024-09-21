@@ -15,7 +15,39 @@ For more detailed information about the project, please refer to the following d
 
 ## Code
 
-- [Toolhouse Demo](toolhouse-demo.py): This Python script is boilerplat for interacting with [Toolhouse](https://toolhouse.ai), sponsoring the event.
+- [Toolhouse Demo](toolhouse-demo.py): This Python script is boilerplate for interacting with [Toolhouse](https://toolhouse.ai), sponsoring the event.
+
+### Running the Toolhouse Demo
+
+To run the Toolhouse demo, you need to set up the GROQ_API_KEY environment variable. You can obtain an API key from [console.groq.com](https://console.groq.com). Set the environment variable like this:
+
+```
+export GROQ_API_KEY=your_api_key_here
+```
+
+### Setting up the Environment
+
+It's recommended to use a virtual environment for this project. You can set it up using the provided `requirements.txt` file:
+
+1. Create a virtual environment:
+   ```
+   python -m venv venv
+   ```
+
+2. Activate the virtual environment:
+   - On Windows:
+     ```
+     venv\Scripts\activate
+     ```
+   - On macOS and Linux:
+     ```
+     source venv/bin/activate
+     ```
+
+3. Install the required packages:
+   ```
+   pip install -r requirements.txt
+   ```
 
 ## Use Cases
 
