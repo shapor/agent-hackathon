@@ -35,6 +35,7 @@ def get_review_summary(result_set):
         rev_dict['Review Name'].append(review_name)
         rev_dict['Review Text'].append(review_text)
         rev_dict['Stars'].append(stars)
+        print(f"Got {stars} Star review from {review_name}: {review_text}")
     return pd.DataFrame(rev_dict)
 
 driver = webdriver.Chrome()
@@ -67,6 +68,7 @@ for i, single_url in enumerate(url):
 
     # Scroll through reviews
     for _ in range(scroll_attempts):
+        print(f"scrolling...")
         ele = driver.find_element(By.XPATH, '//div[contains(@class, "m6QErb")]')
         driver.execute_script('arguments[0].scrollTop = arguments[0].scrollHeight', ele)
         time.sleep(SCROLL_PAUSE_TIME)
