@@ -42,7 +42,7 @@ const FormPage = () => {
   return (
     <div className="bg-gradient-to-r from-gray-800 to-gray-900 min-h-screen text-white flex items-center justify-center">
       <div className="max-w-lg w-full p-8 bg-gray-800 rounded-lg shadow-md">
-        <h2 className="text-3xl font-bold mb-8 text-center">Tell Us About Your Company</h2>
+        <h2 className="text-3xl font-bold mb-8 text-center">Tell Us About The Company</h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
