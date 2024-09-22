@@ -42,7 +42,7 @@ export default function Sidebar() {
                   currentCompany === company.name
                     ? 'bg-gray-700 text-white'
                     : 'text-gray-400 hover:bg-gray-800 hover:text-white'
-                } group flex gap-x-3 items-center rounded-md py-2 px-4 text-sm font-semibold leading-6`}
+                } group flex gap-x-3 items-center rounded-md py-2 px-4 text-m font-semibold leading-8`}
               >
                 {/* Standard logo or icon */}
                 <img src={agents} alt="Logo" className="h-6 w-6" />
