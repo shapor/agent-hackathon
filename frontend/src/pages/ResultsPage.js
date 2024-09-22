@@ -1,24 +1,33 @@
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 
 const ResultsPage = () => {
-  const location = useLocation(); // Get the passed state from navigation
-  const { message } = location.state || {};
+  const [selectedCompany, setSelectedCompany] = useState('');
+  const [selectedMessage, setSelectedMessage] = useState(''); // Holds the HTML template
 
-  // List of company names to display in the sidebar
-  const companies = ['Company A', 'Company B', 'Company C'];
-  
-  // State to hold the selected company name and its profile
-  const [selectedCompany, setSelectedCompany] = useState('R&L Plumbing');
-  const [selectedMessage, setSelectedMessage] = useState(message);
+  // Fetch all companies from the Flask API on page load
+  const [companies, setCompanies] = useState([]);
 
-  // Mock function to simulate changing the profile based on the selected company
-  const handleCompanyClick = (company) => {
-    setSelectedCompany(company);
+  useEffect(() => {
+    fetch('http://127.0.0.1:5000/api/companies')
+      .then((response) => response.json())
+      .then((data) => {
+        setCompanies(data);
+      })
+      .catch((error) => console.error('Error fetching companies:', error));
+  }, []);
 
-    // You could replace this with logic to fetch the actual data for each company
-    setSelectedMessage(`Here is the sentiment and profile data for ${company}. This is just a placeholder.`);
+  // Function to handle clicking on a company name in the sidebar
+  const handleCompanyClick = (companyName) => {
+    setSelectedCompany(companyName);
+
+    // Fetch the template data from the Flask API for the selected company
+    fetch(`http://127.0.0.1:5000/api/company/${companyName}`) // Assuming you have an API route for fetching templates by company name
+      .then((response) => response.json())
+      .then((data) => {
+        setSelectedMessage(data.Template); // Assuming `Template` contains the HTML content
+      })
+      .catch((error) => console.error('Error fetching company template:', error));
   };
 
   return (
@@ -28,12 +37,8 @@ const ResultsPage = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 bg-gray-100 p-8 overflow-auto">
-        <h2 className="text-3xl font-bold mb-8 text-center">
-             Profile and Sentiment
-        </h2>
-
         <div className="bg-white shadow-md p-8 rounded-lg text-black">
-          {/* Render HTML safely using dangerouslySetInnerHTML */}
+          {/* Render the selected company's HTML template */}
           <div
             className="html-content"
             dangerouslySetInnerHTML={{ __html: selectedMessage }}

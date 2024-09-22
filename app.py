@@ -90,11 +90,19 @@
 
 # if __name__ == '__main__':
 #     app.run(debug=True)
+
 import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 import anthropic
+from pymongo import MongoClient
+from bson import ObjectId
+
+# Initialize MongoDB client
+mongo_client = MongoClient('mongodb+srv://syed:12345@cluster0.7zqac.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
+db = mongo_client['AgentHack']  # Replace 'mydatabase' with your database name
+collection = db['Company_Data']
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -107,9 +115,9 @@ load_dotenv()
 api_key = os.getenv("ANTHROPIC_API_KEY")
 
 # Initialize the Anthropic client
-client = anthropic.Anthropic(api_key=api_key)
+anthropic_client = anthropic.Anthropic(api_key=api_key)
 
-# Define a route to handle form submission
+# Define a route to handle form submission (POST request)
 @app.route('/api/submit', methods=['POST'])
 def submit_form():
     data = request.json
@@ -141,28 +149,58 @@ def submit_form():
     """
 
     # Send the response_message to Anthropic to convert it to HTML
-    anthropic_response = client.messages.create(
+    anthropic_response = anthropic_client.messages.create(
         model="claude-3-sonnet-20240229",
         max_tokens=1000,
         temperature=0,
         messages=[
-         {
-            "role": "user",
-            "content": f"""
-            Generate an HTML document for the following company profile. Use modern, professional CSS styling with padding, spacing, and a clean font. 
-            Use subtle background colors, make headings bold and large, and ensure lists are properly indented and spaced. 
-            The document should look polished and user-friendly. Here's the content:\n\n{response_message}
-            """
-        }
+            {
+                "role": "user",
+                "content": f"""
+                Generate an HTML document for the following company profile. Use modern, professional CSS styling with padding, spacing, and a clean font. 
+                Use subtle background colors, make headings bold and large, and ensure lists are properly indented and spaced. 
+                The document should look polished and user-friendly. Here's the content:\n\n{response_message}
+                """
+            }
         ]
     )
 
     # Get the HTML formatted content from Anthropic's response
     html_response = anthropic_response.content[0].text
 
+    # Insert the company details into MongoDB
+    data = {
+        "company_name": company_name,
+        "company_Url": company_url,
+        "Template": html_response
+    }
+    dataentry = collection.insert_one(data)
+
     # Return the HTML response
     return jsonify({'message': html_response}), 200
 
-if __name__ == '__main__':
-    app.run(debug=True) 
+# Define a route to handle GET request to fetch all companies
+@app.route('/api/companies', methods=['GET'])
+def get_all_companies():
+    try:
+        companies = list(collection.find())  # Get all companies from MongoDB
 
+        # Convert ObjectId to string for JSON serialization
+        for company in companies:
+            company['_id'] = str(company['_id'])
+        
+        return jsonify(companies), 200  # Return the list of companies as JSON
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+@app.route('/api/company/<company_name>', methods=['GET'])
+def get_company_template(company_name):
+    # Find the company in the database by name
+    company = collection.find_one({'company_name': company_name})
+    
+    if company:
+        return jsonify({'Template': company['Template']})
+    else:
+        return jsonify({'error': 'Company not found'}), 404
+
+if __name__ == '__main__':
+    app.run(debug=True)

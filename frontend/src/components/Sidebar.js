@@ -1,16 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import agents from '../assets/agents.jpg'; // Your standard logo
 
-// Array of company names
-const companies = [
-  { id: 1, name: 'Company A' },
-  { id: 2, name: 'Company B' },
-  { id: 3, name: 'Company C' },
-  { id: 4, name: 'Company D' },
-  { id: 5, name: 'Company E' },
-];
-
-export default function Sidebar() {
+export default function Sidebar({ companies, onCompanyClick }) {
   const [currentCompany, setCurrentCompany] = useState('');
 
   return (
@@ -33,20 +24,23 @@ export default function Sidebar() {
 
       {/* Company List */}
       <nav className="flex flex-1 flex-col overflow-y-auto">
-        <ul role="list" className="flex flex-1 flex-col gap-y-4">
+        <ul role="list" className="flex flex-1 flex-col gap-y-4 list-none p-0">
           {companies.map((company) => (
-            <li key={company.id}>
+            <li key={company._id}>
               <button
-                onClick={() => setCurrentCompany(company.name)}
+                onClick={() => {
+                  setCurrentCompany(company.company_name);
+                  onCompanyClick(company.company_name); // Pass company name to parent
+                }}
                 className={`w-full ${
-                  currentCompany === company.name
+                  currentCompany === company.company_name
                     ? 'bg-gray-700 text-white'
                     : 'text-gray-400 hover:bg-gray-800 hover:text-white'
                 } group flex gap-x-3 items-center rounded-md py-2 px-4 text-m font-semibold leading-8`}
               >
                 {/* Standard logo or icon */}
                 <img src={agents} alt="Logo" className="h-6 w-6" />
-                {company.name}
+                {company.company_name}
               </button>
             </li>
           ))}
