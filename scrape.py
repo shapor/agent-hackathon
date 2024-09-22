@@ -10,12 +10,6 @@ import pandas as pd
 import re
 import sys
 
-def address_Addition(address1, new_df):
-    address_list = address1.split(',')
-    new_df['address'] = address_list[0]
-    new_df['city'] = address_list[1]
-    return new_df
-
 def get_review_summary(result_set):
     rev_dict = {
         'Review Name': [],
@@ -23,23 +17,34 @@ def get_review_summary(result_set):
         'Stars': []
     }
     for result in result_set:
-        review_name = result.find(class_='d4r55').text
-        review_text = result.find('span', class_='wiI7pd').text
+        try:
+            review_name = result.find(class_='d4r55').text.strip()
+        except AttributeError:
+            review_name = "Unknown"
 
-        # Extract the number of stars
-        stars_element = result.find('span', class_='kvMYJc')
-        stars = 0
-        if stars_element:
-            aria_label = stars_element.get('aria-label', '')
-            stars_match = re.search(r'(\d+) stars?', aria_label)
-            if stars_match:
-                stars = int(stars_match.group(1))
+        try:
+            review_text_element = result.find('span', class_='wiI7pd')
+            review_text = review_text_element.text.strip() if review_text_element else "No text"
+        except AttributeError:
+            review_text = "Error extracting text"
+
+        try:
+            stars_element = result.find('span', class_='kvMYJc')
+            stars = stars_element.get('aria-label', '0 stars').split()[0]
+        except AttributeError:
+            stars = "0"
 
         rev_dict['Review Name'].append(review_name)
         rev_dict['Review Text'].append(review_text)
         rev_dict['Stars'].append(stars)
-        print(f"Got {stars} Star review from {review_name}: {review_text}")
+
     return pd.DataFrame(rev_dict)
+
+def address_Addition(address1, new_df):
+    address_list = address1.split(',')
+    new_df['address'] = address_list[0]
+    new_df['city'] = address_list[1] if len(address_list) > 1 else "Unknown"
+    return new_df
 
 driver = webdriver.Chrome()
 url = ['https://www.google.com/maps/place/R+%26+L+Plumbing/@37.7134393,-122.4436298,15z/data=!4m6!3m5!1s0x808f7fa7d6712dfd:0xd455fc87d60b9b24!8m2!3d37.7134393!4d-122.4436298!16s%2Fg%2F11b6d4dr67']
