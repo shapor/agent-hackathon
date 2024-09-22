@@ -56,7 +56,7 @@ for i, single_url in enumerate(url):
     print(f"found address {address}")
 
     SCROLL_PAUSE_TIME = 2
-    MAX_SCROLL_ATTEMPTS = 50
+    MAX_SCROLL_ATTEMPTS = 200  # Increased to allow for more scrolling
 
     # Find and click the "Reviews" tab
     try:
@@ -70,9 +70,9 @@ for i, single_url in enumerate(url):
         continue
 
     # Scroll through reviews
-    last_height = driver.execute_script("return document.body.scrollHeight")
+    last_review_count = 0
     scroll_attempts = 0
-    no_change_count = 0
+    no_new_reviews_count = 0
 
     while scroll_attempts < MAX_SCROLL_ATTEMPTS:
         print(f"scrolling... (attempt {scroll_attempts + 1})", file=sys.stderr)
@@ -85,22 +85,29 @@ for i, single_url in enumerate(url):
             )
             driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", scrollable_div)
         except:
-            print("Could not find scrollable element", file=sys.stderr)
+            print("Could not find scrollable element, scrolling whole page", file=sys.stderr)
             # If we can't find the scrollable div, try scrolling the whole page
             driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
 
         time.sleep(SCROLL_PAUSE_TIME)
 
-        new_height = driver.execute_script("return document.body.scrollHeight")
-        if new_height == last_height:
-            no_change_count += 1
-            if no_change_count >= 3:  # If no change for 3 consecutive attempts, assume we've reached the bottom
-                print("Reached the bottom of the page", file=sys.stderr)
-                break
-        else:
-            no_change_count = 0  # Reset the counter if the height changed
+        # Count the number of reviews
+        review_elements = driver.find_elements(By.XPATH, '//div[contains(@class, "jftiEf")]')
+        current_review_count = len(review_elements)
 
-        last_height = new_height
+        print(f"Current review count: {current_review_count}", file=sys.stderr)
+
+        if current_review_count > last_review_count:
+            last_review_count = current_review_count
+            no_new_reviews_count = 0
+        else:
+            no_new_reviews_count += 1
+
+        if no_new_reviews_count >= 5:  # If no new reviews loaded after 5 attempts, we've probably reached the end
+            print("No new reviews loaded after multiple attempts. Assuming all reviews are loaded.", file=sys.stderr)
+            break
+
+    print(f"Total reviews found: {last_review_count}", file=sys.stderr)
 
     # Click "More" buttons
     print("clicking more...", file=sys.stderr)
