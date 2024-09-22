@@ -28,9 +28,9 @@ const ResultsPage = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 bg-gray-100 p-8 overflow-auto">
-        <h2 className="text-3xl font-bold mb-8 text-center">
+        {/* <h2 className="text-3xl font-bold mb-8 text-center">
              Profile and Sentiment
-        </h2>
+        </h2> */}
 
         <div className="bg-white shadow-md p-8 rounded-lg text-black">
           {/* Render HTML safely using dangerouslySetInnerHTML */}
