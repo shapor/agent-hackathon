@@ -5,6 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import time
 import pandas as pd
+import re
 
 def address_Addition(address1, new_df):
     address_list = address1.split(',')
@@ -15,13 +16,25 @@ def address_Addition(address1, new_df):
 def get_review_summary(result_set):
     rev_dict = {
         'Review Name': [],
-        'Review Text': []
+        'Review Text': [],
+        'Stars': []
     }
     for result in result_set:
         review_name = result.find(class_='d4r55').text
         review_text = result.find('span', class_='wiI7pd').text
+        
+        # Extract the number of stars
+        stars_element = result.find('span', class_='kvMYJc')
+        stars = 0
+        if stars_element:
+            aria_label = stars_element.get('aria-label', '')
+            stars_match = re.search(r'(\d+) stars?', aria_label)
+            if stars_match:
+                stars = int(stars_match.group(1))
+        
         rev_dict['Review Name'].append(review_name)
         rev_dict['Review Text'].append(review_text)
+        rev_dict['Stars'].append(stars)
     return pd.DataFrame(rev_dict)
 
 driver = webdriver.Chrome()
